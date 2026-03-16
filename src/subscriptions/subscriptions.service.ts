@@ -14,6 +14,7 @@ import { PlansService } from '../plans/plans.service';
 import { CustomersService } from '../customers/customers.service';
 import { PaginationDto, paginate } from '../common/dto/pagination.dto';
 import { BillingCycle } from '../plans/entities/plan.entity';
+import { InvoicesService } from '../invoices/invoices.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -22,6 +23,8 @@ export class SubscriptionsService {
     private readonly subRepo: Repository<Subscription>,
     private readonly plansService: PlansService,
     private readonly customersService: CustomersService,
+    private readonly invoicesService: InvoicesService, 
+
   ) {}
 
   // Create new subscription
@@ -59,7 +62,13 @@ export class SubscriptionsService {
       next_renewal_date: periodEnd,
     });
 
-    return await this.subRepo.save(subscription);
+    const savedSubscription = await this.subRepo.save(subscription);
+
+    // generate invoice on first subscription creation
+    const subscriptionWithRelations = await this.findOne(savedSubscription.id);
+    await this.invoicesService.generateInvoice(subscriptionWithRelations);
+
+    return savedSubscription;
   }
 
   // Get all subscriptions with pagination
