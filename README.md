@@ -23,10 +23,8 @@ Make sure Docker Desktop is running first.
 ```bash
 git clone https://github.com/jitugopale2426/billing-engine.git
 cd billing-engine
-npm install
-docker-compose up -d
-npm run migration:run
-npm run start:dev
+cp .env.example .env
+docker-compose up -d --build
 ```
 
 Open Swagger docs at `http://localhost:3000/api/docs`
